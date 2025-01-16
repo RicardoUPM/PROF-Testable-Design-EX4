@@ -11,14 +11,17 @@ import java.sql.ResultSet;
 public class ProductDelivery {
 	
 	private Vector<Order> orders = new Vector<Order>();
-	
-	public ProductDelivery() throws DatabaseProblemException {
-		
+
+	private DatabaseConnection databaseConnection;
+
+	// Constructor con inyección de dependencia
+	public ProductDelivery(DatabaseConnection databaseConnection) throws DatabaseProblemException {
+		this.databaseConnection = databaseConnection;
+
 		// Orders are loaded into the orders vector for processing
 		try {
-			
 			// Create DB connection
-			Connection connection = DriverManager.getConnection("jdbc:sqlite:resources/orders.db");
+			Connection connection = databaseConnection.connect();
 
 			// Read from the orders table
 			String query = "SELECT * FROM orders";
@@ -27,22 +30,17 @@ public class ProductDelivery {
 
 			// Iterate until we get all orders' data
 			while (resultSet.next()) {
-				
 				int id = resultSet.getInt("id");
 				double amount = resultSet.getDouble("amount");
 				orders.add(new Order(id, amount));
-				
 			}
 
 			// Close the connection
 			connection.close();
 
 		} catch (Exception e) {
-			
-			throw new DatabaseProblemException(); 
-			
+			throw new DatabaseProblemException();
 		}
-
 	}
 
 	// Calculate the handling amount
